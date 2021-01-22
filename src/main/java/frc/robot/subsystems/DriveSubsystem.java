@@ -6,6 +6,10 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.geometry.Pose2d;
+import edu.wpi.first.wpilibj.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.DriveConstants;
 import frc.robot.ExampleSmartMotorController;
 import edu.wpi.first.wpilibj.trajectory.TrapezoidProfile;
@@ -31,6 +35,8 @@ public class DriveSubsystem extends SubsystemBase {
           DriveConstants.kvVoltSecondsPerMeter,
           DriveConstants.kaVoltSecondsSquaredPerMeter);
 
+  private Field2d m_field;
+
   // The robot's drive
   private final DifferentialDrive m_drive = new DifferentialDrive(m_leftLeader, m_rightLeader);
 
@@ -42,6 +48,19 @@ public class DriveSubsystem extends SubsystemBase {
     m_leftLeader.setPID(DriveConstants.kp, 0, 0);
     m_rightLeader.setPID(DriveConstants.kp, 0, 0);
   }
+
+    /** Creates a new DriveSubsystem. */
+    public DriveSubsystem(Field2d field) {
+      m_field = field;
+      m_field.setRobotPose(0.0, 5.0, new Rotation2d());
+      SmartDashboard.putData("Field", m_field);
+
+      m_leftFollower.follow(m_leftLeader);
+      m_rightFollower.follow(m_rightLeader);
+  
+      m_leftLeader.setPID(DriveConstants.kp, 0, 0);
+      m_rightLeader.setPID(DriveConstants.kp, 0, 0);
+    }
 
   /**
    * Drives the robot using arcade controls.
@@ -68,6 +87,10 @@ public class DriveSubsystem extends SubsystemBase {
         ExampleSmartMotorController.PIDMode.kPosition,
         right.position,
         m_feedforward.calculate(right.velocity));
+    
+    if (m_field != null) {
+      m_field.setRobotPose(new Pose2d(left.position, 5.0, new Rotation2d()));
+    }
   }
 
   /**
